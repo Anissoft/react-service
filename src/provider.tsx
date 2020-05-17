@@ -2,7 +2,7 @@ import React from 'react';
 import { DEPENDENCIES } from './constants';
 import { Constructor, InjectIdentificator } from './types';
 
-const context = React.createContext<Map<InjectIdentificator, any>>(new Map());
+export const ContainerContext = React.createContext<Map<InjectIdentificator, any>>(new Map());
 
 export const Provider = ({ 
   services, 
@@ -26,6 +26,13 @@ export const Provider = ({
             ...parameters.map(([, dep]) => dep ),
             ...properties.map(([, dep]) => dep ),
           ]);
+
+          Array.from(deps).forEach((identificator) => {
+            if (!services[identificator as any] ){
+              throw new Error(`Unable to resolve dependency ${String(identificator)} for ${constructor} constructor. Make sure you have provided it.`); 
+            }
+          });
+
           return [constructor, deps] as [Constructor, Set<InjectIdentificator>];
         }
         return [constructor, new Set([])] as [Constructor, Set<InjectIdentificator>];
@@ -86,16 +93,13 @@ export const Provider = ({
     }
 
     spawnServicesWithDependencies(servicesWithDeps);
+
     return allServices;
   })());
 
-  React.useEffect(() =>  {
-    console.log(container);
-  });
-
   return (
-    <context.Provider value={container.current}>
+    <ContainerContext.Provider value={container.current}>
       {children}
-    </context.Provider>
+    </ContainerContext.Provider>
   );
 };

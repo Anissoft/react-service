@@ -1,4 +1,4 @@
-import { PARAMETER_PREFIX, PROPERTY_PREFIX, DIVIDER, VISIBILITY_GLOBAL } from './constants';
+import { PARAMETER_PREFIX, PROPERTY_PREFIX} from './constants';
 import { InjectIdentificator, InjectOptions } from './types';
 
 export function Inject(name: InjectIdentificator, options: InjectOptions = {}) {
