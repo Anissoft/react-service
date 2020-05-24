@@ -1,23 +1,25 @@
 /* eslint-disable max-classes-per-file */
 import React from 'react';
 import 'reflect-metadata';
-// import { text, boolean, withKnobs, number, select, button } from '@storybook/addon-knobs';
-// import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 
-import { Injectable, Inject, Provider } from '../src/react-service';
+import { Service, Inject, Provider, State, useService, merge, update } from '../src/react-service';
 
-const stories = storiesOf('Sandbox', module);
+export default {
+  title: 'Sandbox',
+  component: Provider,
+};
 
-@Injectable()
+@Service()
 class DependencyOfDependency {
-  constructor(){
+  constructor(
+    // @Inject('DEPENDENCY') public dependency: Dependency,
+  ){
     console.log('DependencyOfDependency constructor');
     console.log(this);
   }
 }
 
-@Injectable()
+@Service()
 class Dependency {
   @Inject('DependencyOfDependency') private dependencyOfDependency: DependencyOfDependency;
 
@@ -27,9 +29,11 @@ class Dependency {
   }
 }
 
-@Injectable()
+@Service()
 class Test {
   @Inject('DependencyOfDependency') private dependency2: DependencyOfDependency;
+
+  @State() public state = {foo: 0 };
 
   constructor(
     @Inject('DEPENDENCY') public dependency: Dependency,
@@ -39,7 +43,45 @@ class Test {
   }
 }
 
-stories.add('class', () => {
-  return <Provider services={{'TEST': Test, 'DEPENDENCY': Dependency, 'DependencyOfDependency': DependencyOfDependency}} />;
-});
+const Example = () => {
+  const test = useService<Test>('TEST', (candidate => candidate.state.foo > 5));
+
+  return (
+    <>
+      <pre>{JSON.stringify(test.state, null, 2)}</pre>
+      <button
+        type="submit"
+        onClick={() => {
+          test.state = { foo: test.state.foo + 1 };
+        }}
+      >
+        Change state
+      </button>
+      <button
+        type="submit"
+        onClick={() => {
+          merge(test.state, { foo: test.state.foo +1 });
+        }}
+      >
+        Merge state
+      </button>
+      <button
+        type="submit"
+        onClick={() => {
+          update(test.state, { foo: test.state.foo +1 });
+        }}
+      >
+        Update state
+      </button>
+    </>
+  );
+};
+
+export const ContainerProvider = () => {
+  return (
+    <Provider services={{'TEST': Test, 'DEPENDENCY': Dependency, 'DependencyOfDependency': DependencyOfDependency}}>
+      <Example />
+    </Provider>
+  );
+};
 

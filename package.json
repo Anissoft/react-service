@@ -1,7 +1,7 @@
 {
   "name": "@anissoft/react-service",
-  "version": "0.0.1",
-  "description": "Injectable react services",
+  "version": "0.0.1-beta1",
+  "description": "Service react services",
   "main": "index.js",
   "scripts": {
     "storybook": "start-storybook -p 6006",
@@ -81,6 +81,7 @@
     "react-dom": "^16.12.0"
   },
   "dependencies": {
+    "@anissoft/box": "^2.1.0-beta3",
     "reflect-metadata": "^0.1.13"
   }
 }
