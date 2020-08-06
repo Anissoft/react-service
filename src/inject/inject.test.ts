@@ -22,5 +22,18 @@ describe('@Inject', () => {
       
     expect(Reflect.getMetadata(`${PROPERTY_PREFIX}property`, Test)).toBe(keys.property);
     expect(Reflect.getMetadata(`${PARAMETER_PREFIX}0`, Test)).toBe(keys.parameter);
+  });
+
+  it('should throw exception, if name of injection is not provided', () => {
+    const createInvalid = () => {
+      class Test {
+        @Inject(undefined as any) private property!: string;
+
+        constructor(
+          @Inject(undefined as any) private parameter: string,
+        ) {}
+      }
+    };
+      expect(createInvalid).toThrow();
   })
 })
