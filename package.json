@@ -2,7 +2,9 @@
   "name": "@anissoft/react-service",
   "version": "0.0.1-beta1",
   "description": "Observable react services",
-  "main": "index.js",
+  "main": "dist/react-service.umd.js",
+  "module": "dist/react-service.es5.js",
+  "typings": "react-service.d.ts",
   "scripts": {
     "test": "jest --coverage",
     "build": "tsc --module commonjs && rollup -c rollup.config.js && typedoc --out docs src/react-service.ts --target es6 --excludeNotExported --theme default --mode file --exclude src/utils.ts",

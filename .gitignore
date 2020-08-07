@@ -10,8 +10,13 @@ compiled
 .awcache
 .rpt2_cache
 docs
-/components
-/hooks
-/helpers
+/inject
+/Provider
+/service
+/useService
+/stories
+/*.js
+!*.config.js
+!.eslintrc.js
 /*.ts
 /*.js.map
