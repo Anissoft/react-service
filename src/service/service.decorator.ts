@@ -29,7 +29,9 @@ export function Service() {
     //   }
     // }
     
-    Reflect.defineMetadata(DEPENDENCIES, { parameters, properties }, originalConstructor);
+    if (properties.length > 0 || parameters.length > 0) {
+      Reflect.defineMetadata(DEPENDENCIES, { parameters, properties }, originalConstructor);
+    }
     Reflect.defineMetadata(SERVICE, true, originalConstructor);
 
     return originalConstructor;

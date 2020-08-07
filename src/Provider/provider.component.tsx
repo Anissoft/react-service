@@ -4,6 +4,14 @@ import { Constructor, InjectIdentificator } from '../types';
 
 export const ContainerContext = React.createContext<Map<InjectIdentificator, any>>(new Map());
 
+function getKeys<T>(obj:  Record<InjectIdentificator, T>) {
+  return [...Object.getOwnPropertyNames(obj), ...Object.getOwnPropertySymbols(obj)];
+}
+
+function getValues<T>(obj:  Record<InjectIdentificator, T>) {
+  return getKeys(obj).map(key => obj[key as string]);
+}
+
 export const Provider = ({ 
   services, 
   children 
@@ -11,19 +19,19 @@ export const Provider = ({
 ) => {
   const container = React.useMemo(() => {
     function getInjectIdentificator(value: Constructor){
-      return Object.keys(services).find(key => services[key] === value) as InjectIdentificator ;
+      return getKeys(services).find(key => services[key as string] === value) as InjectIdentificator ;
     }
     const allServices: Map<InjectIdentificator, any> = new Map();
     
     // extract all dependencies identificators from metadata
-    const servicesWithDepsSet: [Constructor, Set<InjectIdentificator>][] = Object.values(services)
+    const servicesWithDepsSet: [Constructor, Set<InjectIdentificator>][] = getValues(services)
       .map((constructor: Constructor) => {
         if (Reflect.hasOwnMetadata(DEPENDENCIES, constructor)) {
-          const {parameters, properties}: {
+          const { parameters, properties }: {
             parameters: [number, InjectIdentificator][];
             properties: [string, InjectIdentificator][];
           } = Reflect.getMetadata(DEPENDENCIES, constructor);
-        
+
           const deps = new Set([
             ...parameters.map(([, dep]) => dep ),
             ...properties.map(([, dep]) => dep ),
@@ -31,7 +39,8 @@ export const Provider = ({
 
           Array.from(deps).forEach((identificator) => {
             if (!services[identificator as any] ){
-              throw new Error(`Unable to resolve dependency ${String(identificator)} for ${constructor} constructor. Make sure you have provided it.`); 
+              // eslint-disable-next-line no-useless-escape
+              throw new Error(`Unable to resolve dependency ${String(identificator).split(/[\s\(\)]/gim).slice(0,2).join(' ')} for ${constructor} constructor. Make sure you have provided it.`); 
             }
           });
 
@@ -103,7 +112,7 @@ export const Provider = ({
     spawnServicesWithDependencies(servicesWithDeps);
 
     return allServices;
-  }, [...Object.values(services)]);
+  }, [...getValues(services)]);
 
   return (
     <ContainerContext.Provider value={container}>
@@ -111,3 +120,8 @@ export const Provider = ({
     </ContainerContext.Provider>
   );
 };
+
+export const ServiceProvider = Provider;
+export const ServicesProvider = Provider;
+export const ServiceConsumer = ContainerContext.Consumer;
+export const ServicesConsumer = ContainerContext.Consumer;

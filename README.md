@@ -2,7 +2,7 @@
 [![Version](https://img.shields.io/npm/v/react-service.svg)](https://www.npmjs.com/package/react-service)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
-> My attempt to make inversion of control solution for React apps with Reflect and Typescript;
+> My attempt to make inversion of control solution for React apps with Reflect metadata and Typescript;
 
 ## Install
 
@@ -14,7 +14,7 @@ npm install @anissoft/react-service --save
 
 First of all - you need to declare interfaces for your services:
 
-```typescript
+```tsx
 // interfaces.ts
 export interface ISessionClient {
   createSession(): Promise<Response>
@@ -32,10 +32,10 @@ export interface IUser {
 }
 ```
 
-Then, you should write some classes to implement these interfaces:
+Then, you should write some classes to implement these interfaces. Use `@Service()` to mark them as service, and `@Inject(tagname)` to define dependency:
 
 ```typescript
-// classes.ts
+// services.ts
 import { Service, Inject } from '@anissoft/react-service';
 import { IUser, ISessionClient } from './interfaces';
 
@@ -68,11 +68,10 @@ export class SessionClientMock implements ISessionClient {
 @Service()
 export class User implements IUser {
   public username = 'Boris Sshec';
-
   public email = 'boris1991@example.com';
 
   @Inject('SESSION_CLIENT') 
-  private sessionClient: SessionClient; 
+  private sessionClient!: SessionClient; 
 
   public async login() {
     await this.sessionClient.createSession();
@@ -85,38 +84,150 @@ export class User implements IUser {
 
 ```
 
-Write react components, which should have acces to your services insidde them:
+Write react components, which should have acces to your services inside them. Use `useService` hook for that:
 
 ```tsx
-// userview.tsx
+// Userview.tsx
 import { Provider } from '@anissoft/react-service';
+import { Iuser } from './interfaces';
 
-export const Example = () => {
-  const test = useService<Test>('TEST');
-
-  console.log(test);
+export const UserView = () => {
+  const user = useService<IUser>('USER');
 
   return (
     <>
+      <span>
+        Username - {user.username}
+      </span>
+      <span>
+        User email - {user.email}
+      </span>
+      <button type="button" onClick={user.logout}>Logout</button>
     </>
   );
 };
-
 ```
 
-Pass those classes that you need in Provider for services, You can configure, which implementation will be resolved by tag-names:
+And finally - pass in `ServiceProvider` those classes that you need for services. You can configure, which implementation will be resolved by tag-names:
 
 ```tsx
-import { Provider } from '@anissoft/react-service';
-import { User, SessionClient} from './classes';
+import { ServiceProvider } from '@anissoft/react-service';
+import { User, SessionClient, SessionClientMock } from './services';
+import { UserView } from './Userview';
 
 const RootComponent = () => {
   return (
-    <Provider services={{ 'USER': User, 'SESSION_CLIENT': SessionClient }}>
-      <Example />
-    </Provider>
+    <ServiceProvider 
+      services={{ 
+        'USER': User, 
+        'SESSION_CLIENT': SessionClient 
+      }}
+    >
+      <Userview />
+    </ServiceProvider>
   );
 };
+
+// ...OR
+
+const DevRootComponent = () => {
+  return (
+    <ServiceProvider 
+      services={{ 
+        'USER': User, 
+        'SESSION_CLIENT': SessionCLientMock,
+      }}
+    >
+      <Userview />
+    </ServiceProvider>
+  );
+};
+```
+
+### @Service and @Inject
+
+You can use `@Inject` on constructors parameters as well as on class properties:
+
+```typescript
+@Service()
+class Test {
+  @Inject('DEPENDENCY_1') 
+  private propertyDependency!: Dependency1; 
+  // note that "!" after property name
+  // it helps to get rid of some typescript errors
+
+  constructor(
+    @Inject('DEPENDENCY_2') public parameterDependency: Dependency2,
+  ){
+    // ...
+  }
+}
+```
+
+It's also highly recommended to keep tag-names in separate object, instead of using string literals every time:
+
+```typescript
+const tags = {
+  dependency: Symbol('dependency'),
+  master: Symbol('master'),
+}
+
+@Service()
+class Dependency {
+  constructor(){}
+}
+
+@Service()
+class Master {
+  constructor(
+    @Inject(tags.dependency) public dependency: Dependency,
+  ){ }
+}
+```
+
+### ServiceProvider and ServiceConsumer
+
+If yu using `React.Components` you can use `ServiceConsumer` instead of `useService` hook:
+
+```tsx
+const tags = {
+  dependency: Symbol('dependency'),
+  master: Symbol('master'),
+}
+
+@Service()
+class Dependency {
+  constructor(){}
+}
+
+@Service()
+class Master {
+  constructor(
+    @Inject(tags.dependency) public dependency: Dependency,
+  ){ }
+}
+
+const Child = () => {
+  return (
+    <ServiceConsumer>
+      {(container) => {
+        console.log(container); // <--
+        return <>Child</>;
+      }}
+    </ServiceConsumer>
+  )
+}
+
+const Root = () => (
+  <ServiceProvider 
+    services={{ 
+      [tags.dependency]: Dependency, 
+      [tags.master]: Master,
+    }}
+  >
+    <Child />
+  </ServiceProvider>,
+);
 ```
 
 ## Author

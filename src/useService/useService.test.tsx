@@ -1,20 +1,43 @@
+import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react'
-import { useService } from './useService.hook'
+import { useService } from './useService.hook';
+import { Service, Inject, ServiceProvider } from '../react-service';
+
+const tags = {
+  dependency: Symbol('dependency'),
+  master: Symbol('master'),
+}
+
+@Service()
+class Dependency {
+  constructor(){}
+}
+
+@Service()
+class Master {
+  constructor(
+    @Inject(tags.dependency) public dependency: Dependency,
+  ){ }
+}
 
 describe('useService', () => {
-  it('shows the children when the checkbox is checked', () => {
-    const testMessage = 'Test Message'
-    render(<HiddenMessage>{testMessage}</HiddenMessage>)
-  
-    // query* functions will return the element or null if it cannot be found
-    // get* functions will return the element or throw an error if it cannot be found
-    expect(screen.queryByText(testMessage)).toBeNull()
-  
-    // the queries can accept a regex to make your selectors more resilient to content tweaks and changes.
-    fireEvent.click(screen.getByLabelText(/show/i))
-  
-    // .toBeInTheDocument() is an assertion that comes from jest-dom
-    // otherwise you could use .toBeDefined()
-    expect(screen.getByText(testMessage)).toBeInTheDocument()
+  it('Should provide access to services from Services context', (end) => {
+    const Child = () => {
+      const dependency = useService<Dependency>(tags.dependency)
+      const master = useService<Master>(tags.master)
+
+      expect(dependency).toBeInstanceOf(Dependency);
+      expect(master).toBeInstanceOf(Master);
+      expect(master.dependency).toBe(dependency);
+      end();
+
+      return <></>;
+    }
+
+    render(
+      <ServiceProvider services={{ [tags.dependency]: Dependency, [tags.master]: Master }}>
+        <Child />
+      </ServiceProvider>
+    );
   })
 });

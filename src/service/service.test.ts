@@ -16,7 +16,17 @@ describe('@Service', () => {
     }
 
     expect(Reflect.getMetadataKeys(Test))
-      .toEqual(expect.arrayContaining([DEPENDENCIES, SERVICE]));
+      .toEqual(expect.arrayContaining([SERVICE]));
+  });
+
+  it('Shouldn\'t add DEPENDENCIES metadata if threr is no dependencies', () => {
+    @Service()
+    class Test {
+      constructor() {}
+    }
+
+    expect(Reflect.getMetadataKeys(Test))
+      .toEqual(expect.not.arrayContaining([DEPENDENCIES]));
   });
 
   it('Should mark all dependencies', () => {

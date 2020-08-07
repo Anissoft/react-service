@@ -13,6 +13,5 @@ docs
 /components
 /hooks
 /helpers
-/*.js
 /*.ts
 /*.js.map

@@ -9,6 +9,12 @@ export default {
   component: Provider,
 };
 
+const tags = {
+  DependencyOfDependency: Symbol('DependencyOfDependency'),
+  DEPENDENCY: Symbol('DEPENDENCY'),
+  TEST: Symbol('TEST'),
+};
+
 @Service()
 class DependencyOfDependency {
   constructor(
@@ -21,7 +27,7 @@ class DependencyOfDependency {
 
 @Service()
 class Dependency {
-  @Inject('DependencyOfDependency') private dependencyOfDependency: DependencyOfDependency;
+  @Inject(tags.DependencyOfDependency) private dependencyOfDependency: DependencyOfDependency;
 
   constructor(){
     console.log('Dependency constructor');
@@ -31,10 +37,10 @@ class Dependency {
 
 @Service()
 class Test {
-  @Inject('DependencyOfDependency') private dependency2: DependencyOfDependency;
+  @Inject(tags.DependencyOfDependency) private dependency2: DependencyOfDependency;
 
   constructor(
-    @Inject('DEPENDENCY') public dependency: Dependency,
+    @Inject(tags.DEPENDENCY) public dependency: Dependency,
   ){
     console.log('Test constructor');
     console.log(this);
@@ -54,7 +60,7 @@ const Example = () => {
 
 export const ContainerProvider = () => {
   return (
-    <Provider services={{'TEST': Test, 'DEPENDENCY': Dependency, 'DependencyOfDependency': DependencyOfDependency}}>
+    <Provider services={{[tags.TEST]: Test, [tags.DEPENDENCY]: Dependency, [tags.DependencyOfDependency]: DependencyOfDependency}}>
       <Example />
     </Provider>
   );
