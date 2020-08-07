@@ -1,6 +1,6 @@
 {
   "name": "@anissoft/react-service",
-  "version": "0.0.1-beta1",
+  "version": "1.0.0",
   "description": "Observable react services",
   "main": "dist/react-service.umd.js",
   "module": "dist/react-service.es5.js",
