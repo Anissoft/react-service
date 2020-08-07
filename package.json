@@ -1,9 +1,14 @@
 {
   "name": "@anissoft/react-service",
   "version": "0.0.1-beta1",
-  "description": "Service react services",
-  "main": "index.js",
+  "description": "Observable react services",
+  "main": "dist/react-service.umd.js",
+  "module": "dist/react-service.es5.js",
+  "typings": "react-service.d.ts",
   "scripts": {
+    "test": "jest --coverage",
+    "build": "tsc --module commonjs && rollup -c rollup.config.js && typedoc --out docs src/react-service.ts --target es6 --excludeNotExported --theme default --mode file --exclude src/utils.ts",
+    "build:watch": "tsc --module commonjs -w",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -27,7 +32,7 @@
     "@storybook/source-loader": "^5.2.8",
     "@testing-library/jest-dom": "^4.2.3",
     "@testing-library/react": "^9.3.2",
-    "@testing-library/react-hooks": "^3.2.1",
+    "@testing-library/react-hooks": "^3.4.1",
     "@types/jest": "^24.0.25",
     "@types/lodash": "^4.14.145",
     "@types/node": "^12.12.6",
@@ -74,14 +79,13 @@
     "ts-jest": "^25.4.0",
     "ts-node": "^8.4.1",
     "typedoc": "^0.15.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.9.7"
   },
   "peerDependencies": {
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   },
   "dependencies": {
-    "@anissoft/box": "^2.1.0-beta3",
     "reflect-metadata": "^0.1.13"
   }
 }

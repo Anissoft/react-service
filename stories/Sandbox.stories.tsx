@@ -2,11 +2,17 @@
 import React from 'react';
 import 'reflect-metadata';
 
-import { Service, Inject, Provider, State, useService, merge, update } from '../src/react-service';
+import { Service, Inject, Provider, useService } from '../src/react-service';
 
 export default {
   title: 'Sandbox',
   component: Provider,
+};
+
+const tags = {
+  DependencyOfDependency: Symbol('DependencyOfDependency'),
+  DEPENDENCY: Symbol('DEPENDENCY'),
+  TEST: Symbol('TEST'),
 };
 
 @Service()
@@ -21,7 +27,7 @@ class DependencyOfDependency {
 
 @Service()
 class Dependency {
-  @Inject('DependencyOfDependency') private dependencyOfDependency: DependencyOfDependency;
+  @Inject(tags.DependencyOfDependency) private dependencyOfDependency: DependencyOfDependency;
 
   constructor(){
     console.log('Dependency constructor');
@@ -31,12 +37,10 @@ class Dependency {
 
 @Service()
 class Test {
-  @Inject('DependencyOfDependency') private dependency2: DependencyOfDependency;
-
-  @State() public state = {foo: 0 };
+  @Inject(tags.DependencyOfDependency) private dependency2: DependencyOfDependency;
 
   constructor(
-    @Inject('DEPENDENCY') public dependency: Dependency,
+    @Inject(tags.DEPENDENCY) public dependency: Dependency,
   ){
     console.log('Test constructor');
     console.log(this);
@@ -44,42 +48,19 @@ class Test {
 }
 
 const Example = () => {
-  const test = useService<Test>('TEST', (candidate => candidate.state.foo > 5));
+  const test = useService<Test>('TEST');
+
+  console.log(test);
 
   return (
     <>
-      <pre>{JSON.stringify(test.state, null, 2)}</pre>
-      <button
-        type="submit"
-        onClick={() => {
-          test.state = { foo: test.state.foo + 1 };
-        }}
-      >
-        Change state
-      </button>
-      <button
-        type="submit"
-        onClick={() => {
-          merge(test.state, { foo: test.state.foo +1 });
-        }}
-      >
-        Merge state
-      </button>
-      <button
-        type="submit"
-        onClick={() => {
-          update(test.state, { foo: test.state.foo +1 });
-        }}
-      >
-        Update state
-      </button>
     </>
   );
 };
 
 export const ContainerProvider = () => {
   return (
-    <Provider services={{'TEST': Test, 'DEPENDENCY': Dependency, 'DependencyOfDependency': DependencyOfDependency}}>
+    <Provider services={{[tags.TEST]: Test, [tags.DEPENDENCY]: Dependency, [tags.DependencyOfDependency]: DependencyOfDependency}}>
       <Example />
     </Provider>
   );
