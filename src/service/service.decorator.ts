@@ -8,27 +8,29 @@ const propRegex = new RegExp(`^${PROPERTY_PREFIX}`);
 
 export function Service() {
   // eslint-disable-next-line func-names
-  return function<T extends { new (...args: any[]): {} }>(originalConstructor: T) {
+  type PropertiesAndMethods = Record<string | number, any>;
+  return function <T extends { new(...args: any[]): PropertiesAndMethods }>(
+    originalConstructor: T
+  ) {
     const keys = Reflect.getMetadataKeys(originalConstructor);
     const parameters = keys
       .filter(key => paramRegex.test(key))
       .map(key => {
-        const [,index] = key.split('::');
-        return [+index, Reflect.getMetadata(key, originalConstructor)] as [number, InjectIdentificator];
+        const [, index] = key.split('::');
+        return [+index, Reflect.getMetadata(key, originalConstructor)] as [
+          number,
+          InjectIdentificator
+        ];
       });
     const properties = keys
       .filter(key => propRegex.test(key))
       .map(key => {
-        const [,name] = key.split('::');
-        return [name, Reflect.getMetadata(key, originalConstructor)] as [string, InjectIdentificator];
+        const [, name] = key.split('::');
+        return [name, Reflect.getMetadata(key, originalConstructor)] as [
+          keyof PropertiesAndMethods,
+          InjectIdentificator
+        ];
       });
-    
-    // class $Service extends originalConstructor {
-    //   constructor(...args: any[]) {
-    //     super(...args);
-    //   }
-    // }
-    
     if (properties.length > 0 || parameters.length > 0) {
       Reflect.defineMetadata(DEPENDENCIES, { parameters, properties }, originalConstructor);
     }

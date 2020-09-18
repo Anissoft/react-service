@@ -1,4 +1,5 @@
 # Welcome to react-service 👋
+[![Build Status](https://travis-ci.org/Anissoft/react-service.svg?branch=master)](https://travis-ci.org/Anissoft/react-service)
 [![Version](https://img.shields.io/npm/v/react-service.svg)](https://www.npmjs.com/package/react-service)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
