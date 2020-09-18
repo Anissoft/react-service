@@ -11,7 +11,7 @@ compiled
 .rpt2_cache
 docs
 /inject
-/Provider
+/provider
 /service
 /useService
 /stories
