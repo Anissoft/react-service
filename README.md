@@ -1,3 +1,6 @@
+## [DEPRECATED] 
+### Note that this repo has been moved to [js-libs](https://github.com/Anissoft/js-libs) as [@anissoft/react-di](https://github.com/Anissoft/js-libs/tree/master/packages/react-di) package.
+
 # Welcome to react-service 👋
 [![Build Status](https://travis-ci.org/Anissoft/react-service.svg?branch=master)](https://travis-ci.org/Anissoft/react-service)
 [![Version](https://img.shields.io/npm/v/react-service.svg)](https://www.npmjs.com/package/react-service)
